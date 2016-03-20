@@ -28,6 +28,7 @@ int main(int argc, char** argv)
 
   while(1) {
       cap >> src;
+      src = imread("02.jpg");
 
   /// Convert it to HSV
   cvtColor(src, src_HSV, CV_BGR2HSV);
@@ -56,17 +57,18 @@ int main(int argc, char** argv)
 
   /// Filter for green
   Mat green_hue_image;
-  inRange(src_HSV, Scalar(79, 199, 60), Scalar(82, 205, 70), green_hue_image);
+  inRange(src_HSV, Scalar(75, 180, 60), Scalar(85, 215, 200), green_hue_image);
 
   /// Filter for yellow
-  Mat yellow_hue_image;
-  inRange(src_HSV, Scalar(70, 150, 90), Scalar(80, 190, 170), yellow_hue_image);
+  /// Mat yellow_hue_image;
+  /// inRange(src_HSV, Scalar(70, 150, 90), Scalar(80, 190, 170), yellow_hue_image);
 
   /// Combine all three
   Mat all_colour_image;
-  Mat green_yellow;
-  addWeighted(green_hue_image, 1.0, yellow_hue_image, 1.0, 0.0, green_yellow);
-  addWeighted(red_hue_image, 1.0, green_yellow, 1.0, 0.0, all_colour_image);
+  all_colour_image = red_hue_image;
+  ///Mat green_yellow;
+  ///addWeighted(green_hue_image, 1.0, yellow_hue_image, 1.0, 0.0, green_yellow);
+  ///addWeighted(red_hue_image, 1.0, green_yellow, 1.0, 0.0, all_colour_image);
 
 
   /// Convert it to gray
@@ -83,7 +85,7 @@ int main(int argc, char** argv)
   int erosion_elem = 0;
   int erosion_size = 10;
   int dilation_elem = 0;
-  int dilation_size = 10;
+  int dilation_size = 20;
   int const max_elem = 2;
   int const max_kernel_size = 21;
 
@@ -98,7 +100,7 @@ int main(int argc, char** argv)
                                          Point( erosion_size, erosion_size ) );
 
   /// Apply the erosion operation
-  erode( all_colour_image, eroded, element1 );
+  /// erode( all_colour_image, eroded, element1 );
 
 
   Mat dilated;
@@ -110,15 +112,20 @@ int main(int argc, char** argv)
                                          Size( 2*dilation_size + 1, 2*dilation_size+1 ),
                                          Point( dilation_size, dilation_size ) );
   /// Apply the dilation operation
-  dilate( eroded, dilated, element );
+  dilate( all_colour_image, dilated, element );
+
+  /// Apply the erosion operation
+  erode( dilated, eroded, element1 );
+
+
+  GaussianBlur( eroded, eroded, Size(9, 9), 2, 2 );
 
 
   std::vector<Vec3f> circles;
 
   /// Apply the Hough Transform to find the circles
   /// HoughCircles( src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows/15, 200, 30, 0, 0);
-  HoughCircles( dilated, circles, CV_HOUGH_GRADIENT, 1, dilated
-                .rows/15, 200, 30, 0, 0);
+  HoughCircles( all_colour_image, circles, CV_HOUGH_GRADIENT, 1, all_colour_image.rows/15, 200, 30, 0, 0);
 
   /// Draw the circles detected
   for( size_t i = 0; i < circles.size(); i++ )
@@ -138,14 +145,14 @@ int main(int argc, char** argv)
        imshow( "HSV Filter", all_colour_image );
        namedWindow("Red", CV_WINDOW_NORMAL );
        imshow( "Red", red_hue_image );
-       namedWindow("Green", CV_WINDOW_NORMAL );
-       imshow( "Green", green_hue_image );
-       namedWindow("Yellow", CV_WINDOW_NORMAL );
-       imshow( "Yellow", yellow_hue_image );
-       namedWindow("HSV", CV_WINDOW_NORMAL);
-       imshow("HSV", src_HSV);
-       namedWindow("dilate", CV_WINDOW_NORMAL);
-       imshow("dilate", dilated);
+       ///namedWindow("Green", CV_WINDOW_NORMAL );
+       ///imshow( "Green", green_hue_image );
+       /// namedWindow("Yellow", CV_WINDOW_NORMAL );
+       /// imshow( "Yellow", yellow_hue_image );
+       /// namedWindow("HSV", CV_WINDOW_NORMAL);
+       /// imshow("HSV", src_HSV);
+       namedWindow("erode", CV_WINDOW_NORMAL);
+       imshow("erode", eroded);
 
 
        waitKey(1000/24);
