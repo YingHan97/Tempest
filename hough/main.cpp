@@ -135,7 +135,7 @@ int main(int argc, char** argv)
       // circle center
            circle( src, center, 3, Scalar(0,255,0), -1, 8, 0 );
            // circle outline
-           circle( src, center, radius, Scalar(0,0,255), 3, 8, 0 );
+           circle( src, center, radius, Scalar(150,0,255), 3, 8, 0 );
         }
 
        /// Show your results
